@@ -1,3 +1,5 @@
+import os
+
 import discord
 from discord.ext import commands
 
@@ -118,8 +120,17 @@ async def ping(ctx):
 async def post(ctx):
     z = ctx.message.content
     embedVar = discord.Embed(description=z[6:100000000000], color=0x00ff00)
-    await ctx.send(embed=embedVar)
-    await ctx.message.delete()
+    if len(ctx.message.attachments) > 0:
+        for sex in range(len(ctx.message.attachments)):
+            y = ctx.message.attachments[sex].url
+            embedVar.set_image(url=y)
 
+        await ctx.send(embed=embedVar)
+        await ctx.message.delete()
+    else:
+        await ctx.send(embed=embedVar)
+        await ctx.message.delete()
+# Add realization more than 1 pic
+# Guilds
 
 bot.run("MTAzOTk3OTMxMDYyODQ4MzEyNA.GkJ5F1.u3Bp503Vi4LOX6oAUa3ztQ2udyCx8-DEkYRVsg")
