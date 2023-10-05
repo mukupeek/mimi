@@ -150,6 +150,6 @@ async def post(ctx):
 
 
 # Add realization more than 1 pic
-# Guilds
+# Guildsg
 
-bot.run("MTAzOTk3OTMxMDYyODQ4MzEyNA.GkJ5F1.u3Bp503Vi4LOX6oAUa3ztQ2udyCx8-DEkYRVsg")
+bot.run("MTAzOTk3OTMxMDYyODQ4MzEyNA.GkJ5F1.u3Bp503Vi4LOX6oAUa3ztQ2udyCx8-DEkYRVs")
