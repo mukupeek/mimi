@@ -1,5 +1,8 @@
+import configparser
+
 import discord
 from discord.ext import commands
+from discord.ui import View, Button
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -33,7 +36,7 @@ async def on_raw_reaction_add(payload):
     if payload.member.id == bot.user.id:
         return
 
-    # verif
+    # verification
     async def like():
         match payload.emoji.name:
             case '3908purple0wiii':
@@ -64,7 +67,7 @@ async def on_raw_reaction_add(payload):
             case '2298purple2wiii':
                 await payload.member.add_roles(discord.utils.get(guild.roles, id=1038546466278481940))
 
-    async def verif():
+    async def verification():
         member = payload.member
         if payload.emoji.name == '✅':
             num = [1038199925189640323, 1037845308517924885, 1037845381188435969, 1038199922379464776,
@@ -79,7 +82,7 @@ async def on_raw_reaction_add(payload):
 
     match payload.message_id:
         case 1038519665040838677:
-            await verif()
+            await verification()
         case 1038579472800153610:
             await boys_and_girls()
         case 1038576815456931900:
@@ -134,22 +137,43 @@ async def ping(ctx):
 
 
 @bot.command()
-async def post(ctx):
+async def post(ctx, *args):
     z = ctx.message.content
-    embedVar = discord.Embed(description=z[6:100000000000], color=0xe6e6fa)
-    if len(ctx.message.attachments) > 0:
-        for sex in range(len(ctx.message.attachments)):
-            y = ctx.message.attachments[sex].url
-            embedVar.set_image(url=y)
+    user_role = ctx.author.top_role.id
+    if user_role == 1037854733458735216:
+        if args.count('Кнопки:'):
+            index = args.index('Кнопки:')
+            message = args[index + 1:100000]
+            for cake in range(0, len(message), 3):
+                view = View()
+                button = Button(label=message[cake], style=discord.ButtonStyle.grey, emoji=message[cake + 2], row=cake)
+                view.add_item(button)
+        embed = discord.Embed(description=z[6:100000000000], color=0xe6e6fa)
+        # url = 'https://disk.yandex.ru/i/ZFyR7rV8r0RNtQ'
+        # embed.set_thumbnail(url=url)
+        if len(ctx.message.attachments) > 0:
+            for sex in range(len(ctx.message.attachments)):
+                y = ctx.message.attachments[sex].url
+                embed.set_image(url=y)
 
-        await ctx.send(embed=embedVar)
-        await ctx.message.delete()
+            await ctx.send(embed=embed)
+            await ctx.message.delete()
+        else:
+            await ctx.send(view=view, embed=embed)
+            view.clear_items()
+            await ctx.message.delete()
     else:
-        await ctx.send(embed=embedVar)
+        embed = discord.Embed(description='Коть, у тебя нет прав на эту команду :(', color=0xe6e6fa)
+        await ctx.send(embed=embed)
         await ctx.message.delete()
 
 
+# CheckList:
 # Add realization more than 1 pic
-# Guildsg
+# Guilds
 
-bot.run("MTAzOTk3OTMxMDYyODQ4MzEyNA.GkJ5F1.u3Bp503Vi4LOX6oAUa3ztQ2udyCx8-DEkYRVs")
+config = configparser.ConfigParser()
+config.read("settings.ini")
+token = config["Bot"]["BOT_TOKEN"]
+print(token)
+bot.run(token)
