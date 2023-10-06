@@ -138,16 +138,21 @@ async def ping(ctx):
 
 @bot.command()
 async def post(ctx, *args):
+    i = 0
+    view = View()
     z = ctx.message.content
     user_role = ctx.author.top_role.id
     if user_role == 1037854733458735216:
         if args.count('Кнопки:'):
+            i = 1
             index = args.index('Кнопки:')
             message = args[index + 1:100000]
+            index_start = z.index('Кнопки:')
+            z = z[:index_start]
             for cake in range(0, len(message), 3):
-                view = View()
-                button = Button(label=message[cake], style=discord.ButtonStyle.grey, emoji=message[cake + 2], row=cake)
-                view.add_item(button)
+                exec(f"button{cake} = Button(label=message[cake], style=discord.ButtonStyle.grey, emoji=message[cake "
+                     f"+ 2])")
+                exec(f"view.add_item(button{cake})")
         embed = discord.Embed(description=z[6:100000000000], color=0xe6e6fa)
         # url = 'https://disk.yandex.ru/i/ZFyR7rV8r0RNtQ'
         # embed.set_thumbnail(url=url)
@@ -156,12 +161,14 @@ async def post(ctx, *args):
                 y = ctx.message.attachments[sex].url
                 embed.set_image(url=y)
 
+        if i == 0:
             await ctx.send(embed=embed)
             await ctx.message.delete()
         else:
             await ctx.send(view=view, embed=embed)
             view.clear_items()
             await ctx.message.delete()
+
     else:
         embed = discord.Embed(description='Коть, у тебя нет прав на эту команду :(', color=0xe6e6fa)
         await ctx.send(embed=embed)
@@ -176,4 +183,4 @@ config = configparser.ConfigParser()
 config.read("settings.ini")
 token = config["Bot"]["BOT_TOKEN"]
 print(token)
-bot.run(token)
+bot.run()
