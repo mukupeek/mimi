@@ -7,23 +7,21 @@ from discord.ui import View, Button
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
-
+channel_for_news = bot.get_channel(1037032090228773005)
+channel_ava = bot.get_channel(1037032090228773005)
+channel_chat = bot.get_channel(1038151796180402257)
 
 # @bot.command()
 # async def helper(ctx):
 #  embed = discord.Embed(title="Список команд", description="Список доступных команд бота", color=discord.Color.blue())
-#
 #     embed.add_field(name="!post", value="Создаёт пост от имени бота", inline=False)
-#     embed.add_field(name="!ping", value="Пинг Понг", inline=False)
-#
 #     await ctx.send(embed=embed)
 
 
 @bot.event
 async def on_member_remove(member):
     message = '***Пока пока*** :( ' + member.mention
-    channel = bot.get_channel(1038151796180402257)
-    await channel.send(message)
+    await channel_chat.send(message)
 
 
 @bot.event
@@ -77,8 +75,7 @@ async def on_raw_reaction_add(payload):
                 await payload.member.add_roles(discord.utils.get(guild.roles, id=num[draw]))
             await reaction.remove(user=payload.member)
             message_to_hi = '***Привет привет, милый котик :3*** ' + member.mention
-            channel_to_hi = bot.get_channel(1038151796180402257)
-            await channel_to_hi.send(message_to_hi)
+            await channel_chat.send(message_to_hi)
 
     match payload.message_id:
         case 1038519665040838677:
@@ -132,11 +129,6 @@ async def on_raw_reaction_remove(payload):
 
 
 @bot.command()
-async def ping(ctx):
-    await ctx.send("pong")
-
-
-@bot.command()
 async def post(ctx, *args):
     i = 0
     view = View()
@@ -175,12 +167,26 @@ async def post(ctx, *args):
         await ctx.message.delete()
 
 
+@bot.event
+async def on_member_update(before, after):
+    if after.activity == 'Streaming':
+        if after.activity.twitch_name is not None and after.id == 'avazc1mmer':
+            twitch_link = after.activity.url
+            await channel_ava.send(
+                'Мама котик запустила стрим! Скорее сюда: ' + twitch_link + 'Не забудьте печеньки с чаем!')
+    if after.activity == 'Game':
+        if after.id == 'avazc1mmer':
+            activity_name = after.activity.name
+            await channel_ava.send('Мама котик ' + activity_name + '. Присоединяйтесь!')
+
+
 # CheckList:
-# Add realization more than 1 pic
-# Guilds
+# Add realization more than 1 pic and thumbnail
+# Guilds ( text )
+# Twitch.tv alert ( needs to test )
 
 config = configparser.ConfigParser()
 config.read("settings.ini")
 token = config["Bot"]["BOT_TOKEN"]
 print(token)
-bot.run()
+bot.run('')
