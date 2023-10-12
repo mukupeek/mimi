@@ -7,15 +7,32 @@ from discord.ui import View, Button
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
-channel_for_news = bot.get_channel(1037032090228773005)
-channel_ava = bot.get_channel(1037032090228773005)
-channel_chat = bot.get_channel(1038151796180402257)
+channel_ava = None
+channel_chat = None
+channel_for_news = None
+ava_id = 0
+
 
 # @bot.command()
 # async def helper(ctx):
 #  embed = discord.Embed(title="Список команд", description="Список доступных команд бота", color=discord.Color.blue())
 #     embed.add_field(name="!post", value="Создаёт пост от имени бота", inline=False)
 #     await ctx.send(embed=embed)
+
+@bot.event
+async def on_ready():
+    global channel_ava
+    global channel_for_news
+    global channel_chat
+    global ava_id
+    ch_ava = int(config["Guild"]["ch_ava"])
+    news = int(config["Guild"]["news"])
+    chat = int(config["Guild"]["chat"])
+    channel_ava = bot.get_channel(ch_ava)
+    channel_for_news = bot.get_channel(news)
+    channel_chat = bot.get_channel(chat)
+    ava_id = int(config["Guild"]["ava_id"])
+    return channel_chat, channel_ava, channel_for_news, ava_id
 
 
 @bot.event
@@ -74,7 +91,7 @@ async def on_raw_reaction_add(payload):
             for draw in range(len(num)):
                 await payload.member.add_roles(discord.utils.get(guild.roles, id=num[draw]))
             await reaction.remove(user=payload.member)
-            message_to_hi = '***Привет привет, милый котик :3*** ' + member.mention
+            message_to_hi = '***Привет привет, добро пожаловать в наши ряды!*** ' + member.mention
             await channel_chat.send(message_to_hi)
 
     match payload.message_id:
@@ -131,23 +148,42 @@ async def on_raw_reaction_remove(payload):
 @bot.command()
 async def post(ctx, *args):
     i = 0
-    view = View()
+    view = View(timeout=None)
     z = ctx.message.content
     user_role = ctx.author.top_role.id
+    index_start_for_web = 1000000000
     if user_role == 1037854733458735216:
         if args.count('Кнопки:'):
+            # url = None
+            # if args.count('Ссылка:'):
+            #     index_start_for_web = args.index('Ссылка:')
+            #     index = z.index('Ссылка:')
+            #     url = str(args[index_start_for_web + 1])
+            #     z = z[:index]
             i = 1
             index = args.index('Кнопки:')
-            message = args[index + 1:100000]
+            message = args[index + 1: index_start_for_web]
             index_start = z.index('Кнопки:')
+            # index_for_callback = message.index('Текст:')
             z = z[:index_start]
-            for cake in range(0, len(message), 3):
+            for cake in range(0, len(message), 4):
                 exec(f"button{cake} = Button(label=message[cake], style=discord.ButtonStyle.grey, emoji=message[cake "
                      f"+ 2])")
                 exec(f"view.add_item(button{cake})")
+
+                async def button_callback(interaction):
+                    guild = bot.get_guild(interaction.guild_id)
+                    await interaction.user.add_roles(discord.utils.get(guild.roles, id=int(message[cake+3])))
+                    await interaction.response.send_message('Поздравляю! Теперь ты часть гильдии <3' + interaction.user.
+                                                            mention)
+
+                exec(f"button{cake}.callback = button_callback")
+
         embed = discord.Embed(description=z[6:100000000000], color=0xe6e6fa)
-        # url = 'https://disk.yandex.ru/i/ZFyR7rV8r0RNtQ'
-        # embed.set_thumbnail(url=url)
+        url = ('https://media.discordapp.net/attachments/1038149636126425118/1160935185450287164/iiiko.png?ex=65367825'
+               '&is=65240325&hm=5e0f6029fbcf7a2903f2f70c3569f4ef2be46971ce650cc37de49ac084f46bd9&=&width=612&height'
+               '=612')
+        embed.set_thumbnail(url=url)
         if len(ctx.message.attachments) > 0:
             for sex in range(len(ctx.message.attachments)):
                 y = ctx.message.attachments[sex].url
@@ -162,31 +198,38 @@ async def post(ctx, *args):
             await ctx.message.delete()
 
     else:
-        embed = discord.Embed(description='Коть, у тебя нет прав на эту команду :(', color=0xe6e6fa)
+        embed = discord.Embed(description='Товарищь, у тебя нет прав на эту команду :(', color=0xe6e6fa)
         await ctx.send(embed=embed)
         await ctx.message.delete()
 
 
 @bot.event
-async def on_member_update(before, after):
-    if after.activity == 'Streaming':
-        if after.activity.twitch_name is not None and after.id == 'avazc1mmer':
-            twitch_link = after.activity.url
-            await channel_ava.send(
-                'Мама котик запустила стрим! Скорее сюда: ' + twitch_link + 'Не забудьте печеньки с чаем!')
-    if after.activity == 'Game':
-        if after.id == 'avazc1mmer':
-            activity_name = after.activity.name
-            await channel_ava.send('Мама котик ' + activity_name + '. Присоединяйтесь!')
+async def on_presence_update(before, after):
+    print(0)
+    if after.id == ava_id:
+        print(1)
+        if isinstance(before.activity, discord.activity.Streaming):
+            print(4)
+            await channel_ava.send('Стрим закончился, всем спасибо, что пришли!')
+        if isinstance(after.activity, discord.activity.Streaming):
+            print(2)
+            if after.activity.twitch_name is not None:
+                print(3)
+                twitch_link = after.activity.url
+                await channel_ava.send(
+                    'Лидер запустила стрим! Скорее сюда: ' + twitch_link + 'Не забудьте печеньки с чаем!')
+        if isinstance(after.activity, discord.activity.Game):
+            print(1)
+            print(channel_ava)
+            await channel_ava.send('Лидер играет в ' + after.activity.name + '. Присоединяйтесь!')
 
 
 # CheckList:
-# Add realization more than 1 pic and thumbnail
+# Add realization more than 1 pic in post command
 # Guilds ( text )
 # Twitch.tv alert ( needs to test )
 
 config = configparser.ConfigParser()
 config.read("settings.ini")
 token = config["Bot"]["BOT_TOKEN"]
-print(token)
-bot.run('')
+bot.run(token)
