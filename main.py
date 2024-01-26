@@ -13,11 +13,41 @@ channel_for_news = None
 ava_id = 0
 
 
-# @bot.command()
-# async def helper(ctx):
-#  embed = discord.Embed(title="Список команд", description="Список доступных команд бота", color=discord.Color.blue())
-#     embed.add_field(name="!post", value="Создаёт пост от имени бота", inline=False)
-#     await ctx.send(embed=embed)
+@bot.command()
+async def helper(ctx):
+    embed = discord.Embed(title="Список команд", description="Список доступных команд бота", color=discord.Color.blue())
+    embed.add_field(name="!post", value="Создаёт пост от имени бота", inline=False)
+    await ctx.send(embed=embed)
+
+
+@bot.command()
+async def settings(ctx):
+    embed = discord.Embed(title="Настройка", description=" Список доступных комманд для настройки",
+                          color=discord.Color.red())
+    embed.add_field(name="!post", value="Создаёт пост от имени бота", inline=False)
+    view = View(timeout=None)
+    embed.add_field(name="Каналы", value="Изменить каналы", inline=False)
+    button1 = Button(label="!post", style=discord.ButtonStyle.green)
+    view.add_item(button1)
+    button2 = Button(label="Каналы", style=discord.ButtonStyle.green)
+    view.add_item(button2)
+
+    async def button_callback1(interaction):
+        guild = bot.get_guild(interaction.guild_id)
+        embed1 = discord.Embed(title="!post", description="")
+        await interaction.response.send_message(embed=embed1)
+
+    async def button_callback2(interaction):
+        guild = bot.get_guild(interaction.guild_id)
+        embed2 = discord.Embed(title="Каналы")
+        embed2.add_field(name="Новостной канал", value="", inline=False)
+        embed2.add_field(name="Канал уведомлений", value="", inline=False)
+        await interaction.response.send_message(embed=embed2)
+
+    button1.callback = button_callback1
+    button2.callback = button_callback2
+    await ctx.send(embed=embed, view=view)
+
 
 @bot.event
 async def on_ready():
@@ -173,7 +203,7 @@ async def post(ctx, *args):
 
                 async def button_callback(interaction):
                     guild = bot.get_guild(interaction.guild_id)
-                    await interaction.user.add_roles(discord.utils.get(guild.roles, id=int(message[cake+3])))
+                    # await interaction.user.add_roles(discord.utils.get(guild.roles, id=int(message[cake + 3])))
                     await interaction.response.send_message('Поздравляю! Теперь ты часть гильдии <3' + interaction.user.
                                                             mention)
 
@@ -203,28 +233,29 @@ async def post(ctx, *args):
         await ctx.message.delete()
 
 
-@bot.event
-async def on_presence_update(before, after):
-    print(0)
-    if after.id == ava_id:
-        print(1)
-        if isinstance(before.activity, discord.activity.Streaming):
-            print(4)
-            await channel_ava.send('Стрим закончился, всем спасибо, что пришли!')
-        if isinstance(after.activity, discord.activity.Streaming):
-            print(2)
-            if after.activity.twitch_name is not None:
-                print(3)
-                twitch_link = after.activity.url
-                await channel_ava.send(
-                    'Лидер запустила стрим! Скорее сюда: ' + twitch_link + 'Не забудьте печеньки с чаем!')
-        if isinstance(after.activity, discord.activity.Game):
-            print(1)
-            print(channel_ava)
-            await channel_ava.send('Лидер играет в ' + after.activity.name + '. Присоединяйтесь!')
+# @bot.event
+# async def on_presence_update(before, after):
+#     print(0)
+#     if after.id == ava_id:
+#         print(1)
+#         if isinstance(before.activity, discord.activity.Streaming):
+#             print(4)
+#             await channel_ava.send('Стрим закончился, всем спасибо, что пришли!')
+#         if isinstance(after.activity, discord.activity.Streaming):
+#             print(2)
+#             if after.activity.twitch_name is not None:
+#                 print(3)
+#                 twitch_link = after.activity.url
+#                 await channel_ava.send(
+#                     'Лидер запустила стрим! Скорее сюда: ' + twitch_link + 'Не забудьте печеньки с чаем!')
+#         if isinstance(after.activity, discord.activity.Game):
+#             print(1)
+#             print(channel_ava)
+#             await channel_ava.send('Лидер играет в ' + after.activity.name + '. Присоединяйтесь!')
 
 
 # CheckList:
+# View for !post and public settings
 # Add realization more than 1 pic in post command
 # Guilds ( text )
 # Twitch.tv alert ( needs to test )
