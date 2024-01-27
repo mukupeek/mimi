@@ -32,6 +32,9 @@ async def settings(ctx):
     button2 = Button(label="Каналы", style=discord.ButtonStyle.green)
     view.add_item(button2)
 
+    # async def button_callback(interaction: discord.Interaction):
+
+
     async def button_callback1(interaction):
         guild = bot.get_guild(interaction.guild_id)
         embed1 = discord.Embed(title="!post", description="")
@@ -40,9 +43,17 @@ async def settings(ctx):
     async def button_callback2(interaction):
         guild = bot.get_guild(interaction.guild_id)
         embed2 = discord.Embed(title="Каналы")
-        embed2.add_field(name="Новостной канал", value="", inline=False)
-        embed2.add_field(name="Канал уведомлений", value="", inline=False)
-        await interaction.response.send_message(embed=embed2)
+        for channel in config["Guild_name"]:
+            embed2.add_field(name=str(config["Guild_name"][channel]), value='')
+        print(embed2.fields)
+        print(len(embed2.fields))
+        view1 = View(timeout=None)
+        for field in range(0, len(embed2.fields)):
+            exec(f"button{field} = Button(label=embed2.fields[field].name, style=discord.ButtonStyle.grey)")
+            exec(f"view1.add_item(button{field})")
+            exec(f"button.callback = button_callback3")
+
+        await interaction.response.send_message(embed=embed2, view=view1)
 
     button1.callback = button_callback1
     button2.callback = button_callback2
